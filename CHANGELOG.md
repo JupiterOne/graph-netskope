@@ -7,3 +7,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- Ingest new entities
+  - `netskope_tenant`
+  - `netskope_device`
+  - `netskope_user`
+  - `netskope_user_configuration`
+  - `netskope_app_instance`
+- Build new relationships
+  - `netskope_tenant_has_device`
+  - `netskope_device_has_user`
+  - `netskope_user_has_configuration`
+  - `netskope_tenant_has_app_instance`

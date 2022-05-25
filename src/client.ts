@@ -1,121 +1,171 @@
-import http from 'http';
+import { URL, URLSearchParams } from 'url';
+import fetch, { Response } from 'node-fetch';
+import { retry } from '@lifeomic/attempt';
 
-import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
+import {
+  IntegrationProviderAPIError,
+  IntegrationProviderAuthenticationError,
+} from '@jupiterone/integration-sdk-core';
 
 import { IntegrationConfig } from './config';
-import { AcmeUser, AcmeGroup } from './types';
+import { AppInstance, Device, NetskopeResponse, UserConfig } from './types';
 
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 
-/**
- * An APIClient maintains authentication state and provides an interface to
- * third party data APIs.
- *
- * It is recommended that integrations wrap provider data APIs to provide a
- * place to handle error responses and implement common patterns for iterating
- * resources.
- */
+class ResponseError extends IntegrationProviderAPIError {
+  response: Response;
+  constructor(options) {
+    super(options);
+    this.response = options.response;
+  }
+}
+
 export class APIClient {
   constructor(readonly config: IntegrationConfig) {}
 
-  public async verifyAuthentication(): Promise<void> {
-    // TODO make the most light-weight request possible to validate
-    // authentication works with the provided credentials, throw an err if
-    // authentication fails
-    const request = new Promise<void>((resolve, reject) => {
-      http.get(
-        {
-          hostname: 'localhost',
-          port: 443,
-          path: '/api/v1/some/endpoint?limit=1',
-          agent: false,
-          timeout: 10,
-        },
-        (res) => {
-          if (res.statusCode !== 200) {
-            reject(new Error('Provider authentication failed'));
-          } else {
-            resolve();
+  private readonly paginateEntitiesPerPage = 500;
+
+  private withBaseUri = (path: string, params?: Record<string, string>) => {
+    const url = new URL(
+      `https://${this.config.tenantName}.goskope.com/api/v1${path}`,
+    );
+    url.search = new URLSearchParams(params).toString();
+    return url.toString();
+  };
+
+  public async request<T>(uri: string): Promise<T> {
+    try {
+      const result = await retry<Response>(
+        async () => {
+          // Only POST requests can have body, where token is placed
+          const authBody = { token: this.config.apiV1Token };
+          const response = await fetch(uri, {
+            method: 'POST',
+            body: JSON.stringify(authBody),
+            headers: { 'Content-Type': 'application/json' },
+          });
+          if (!response.ok) {
+            throw new ResponseError({
+              endpoint: uri,
+              status: response.status,
+              statusText: response.statusText,
+              response,
+            });
           }
+          return response;
+        },
+        {
+          delay: 1000,
+          maxAttempts: 10,
         },
       );
-    });
-
-    try {
-      await request;
+      return (await result.json()) as T;
     } catch (err) {
-      throw new IntegrationProviderAuthenticationError({
+      throw new IntegrationProviderAPIError({
         cause: err,
-        endpoint: 'https://localhost/api/v1/some/endpoint?limit=1',
+        endpoint: uri.toString(),
         status: err.status,
         statusText: err.statusText,
       });
     }
   }
 
-  /**
-   * Iterates each user resource in the provider.
-   *
-   * @param iteratee receives each resource to produce entities/relationships
-   */
-  public async iterateUsers(
-    iteratee: ResourceIteratee<AcmeUser>,
-  ): Promise<void> {
-    // TODO paginate an endpoint, invoke the iteratee with each record in the
-    // page
-    //
-    // The provider API will hopefully support pagination. Functions like this
-    // should maintain pagination state, and for each page, for each record in
-    // the page, invoke the `ResourceIteratee`. This will encourage a pattern
-    // where each resource is processed and dropped from memory.
-
-    const users: AcmeUser[] = [
-      {
-        id: 'acme-user-1',
-        name: 'User One',
-      },
-      {
-        id: 'acme-user-2',
-        name: 'User Two',
-      },
-    ];
-
-    for (const user of users) {
-      await iteratee(user);
+  public async verifyAuthentication(): Promise<void> {
+    const endpoint = this.withBaseUri('/clients', { limit: '1' });
+    try {
+      const body = await this.request<NetskopeResponse<Device[]>>(endpoint);
+      if (body.status === 'error') {
+        throw new IntegrationProviderAuthenticationError({
+          endpoint,
+          status: body.errorCode,
+          statusText: body.errors.join('\n'),
+        });
+      }
+    } catch (err) {
+      throw new IntegrationProviderAuthenticationError({
+        cause: err,
+        endpoint,
+        status: err.status,
+        statusText: err.statusText,
+      });
     }
   }
 
-  /**
-   * Iterates each group resource in the provider.
-   *
-   * @param iteratee receives each resource to produce entities/relationships
-   */
-  public async iterateGroups(
-    iteratee: ResourceIteratee<AcmeGroup>,
-  ): Promise<void> {
-    // TODO paginate an endpoint, invoke the iteratee with each record in the
-    // page
-    //
-    // The provider API will hopefully support pagination. Functions like this
-    // should maintain pagination state, and for each page, for each record in
-    // the page, invoke the `ResourceIteratee`. This will encourage a pattern
-    // where each resource is processed and dropped from memory.
+  public async iterateDevices(iteratee: ResourceIteratee<Device>) {
+    let page = 0;
+    let length = 0;
 
-    const groups: AcmeGroup[] = [
-      {
-        id: 'acme-group-1',
-        name: 'Group One',
-        users: [
-          {
-            id: 'acme-user-1',
-          },
-        ],
-      },
-    ];
+    do {
+      const endpoint = this.withBaseUri('/clients', {
+        limit: `${this.paginateEntitiesPerPage}`,
+        skip: `${this.paginateEntitiesPerPage * page}`,
+      });
 
-    for (const group of groups) {
-      await iteratee(group);
+      const body = await this.request<NetskopeResponse<Device[]>>(endpoint);
+
+      if (body.status === 'error') {
+        throw new IntegrationProviderAPIError({
+          endpoint: endpoint,
+          status: body.errorCode,
+          statusText: body.errors.join('\n'),
+        });
+      }
+
+      for (const device of body.data) {
+        await iteratee(device);
+      }
+
+      page += 1;
+      length = body.data.length;
+    } while (length > 0);
+  }
+
+  public async iterateUserConfigurationInUser(
+    email: string,
+    iteratee: ResourceIteratee<UserConfig>,
+  ) {
+    const endpoint = this.withBaseUri('/userconfig', {
+      email,
+      configtype: 'agent',
+    });
+
+    const body = await this.request<NetskopeResponse<UserConfig>>(endpoint);
+
+    if (body.status === 'success') {
+      await iteratee(body.data);
     }
+  }
+
+  public async iterateAppInstances(iteratee: ResourceIteratee<AppInstance>) {
+    let page = 0;
+    let length = 0;
+
+    do {
+      const endpoint = this.withBaseUri('/app_instances', {
+        op: 'list',
+        limit: `${this.paginateEntitiesPerPage}`,
+        skip: `${this.paginateEntitiesPerPage * page}`,
+      });
+
+      const body = await this.request<NetskopeResponse<AppInstance[]>>(
+        endpoint,
+      );
+
+      if (body.status === 'error') {
+        throw new IntegrationProviderAPIError({
+          endpoint: endpoint,
+          status: body.errorCode,
+          statusText: body.errors.join('\n'),
+        });
+      }
+
+      for (const appInstance of body.data) {
+        await iteratee(appInstance);
+      }
+
+      page += 1;
+      length = body.data.length;
+    } while (length > 0);
   }
 }
 

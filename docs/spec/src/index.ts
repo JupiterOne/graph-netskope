@@ -1,9 +1,18 @@
 import { IntegrationSpecConfig } from '@jupiterone/integration-sdk-core';
 
 import { IntegrationConfig } from '../../../src/config';
-import { accessSpec } from './access';
-import { accountSpec } from './account';
+import { appInstanceSpec } from './app-instance';
+import { deviceSpec } from './device';
+import { tenantSpec } from './tenant';
+import { userSpec } from './user';
+import { userConfigurationSpec } from './user-configuration';
 
 export const invocationConfig: IntegrationSpecConfig<IntegrationConfig> = {
-  integrationSteps: [...accountSpec, ...accessSpec],
+  integrationSteps: [
+    ...appInstanceSpec,
+    ...deviceSpec,
+    ...tenantSpec,
+    ...userSpec,
+    ...userConfigurationSpec,
+  ],
 };

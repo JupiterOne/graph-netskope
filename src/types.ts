@@ -1,25 +1,76 @@
-// Providers often supply types with their API libraries.
-
-export interface AcmeUser {
-  id: string;
-  name: string;
+export interface Event {
+  actor: string;
+  event: string;
+  npa_status: string;
+  status: string;
+  timestamp: number;
 }
 
-export interface AcmeGroup {
-  id: string;
-  name: string;
-  users?: Pick<AcmeUser, 'id'>[];
+export interface DeviceUser {
+  _id: string;
+  device_classification_status: string;
+  last_event: Event;
+  user_added_time: number;
+  user_source: string;
+  user_state: number;
+  userkey: string;
+  username: string;
 }
 
-// Those can be useful to a degree, but often they're just full of optional
-// values. Understanding the response data may be more reliably accomplished by
-// reviewing the API response recordings produced by testing the wrapper client
-// (./client.ts). However, when there are no types provided, it is necessary to define
-// opaque types for each resource, to communicate the records that are expected
-// to come from an endpoint and are provided to iterating functions.
+export interface UserConfig {
+  email: string;
+  brandingdata: {
+    AddonCheckerHost: string;
+    AddonCheckerResponseCode: string;
+    AddonManagerHost: string;
+    EncryptBranding: boolean;
+    OrgKey: string;
+    OrgName: string;
+    SFCheckerHost: string;
+    SFCheckerIP: string;
+    UserEmail: string;
+    UserKey: string;
+  };
+}
 
-/*
-import { Opaque } from 'type-fest';
-export type AcmeUser = Opaque<any, 'AcmeUser'>;
-export type AcmeGroup = Opaque<any, 'AcmeGroup'>;
-*/
+export interface AppInstance {
+  app: string;
+  instance_name: string;
+  instance_id: string;
+  type: string;
+  tags: any[];
+  last_modified: string;
+}
+
+export interface Host {
+  device_make: string;
+  device_model: string;
+  hostname: string;
+  managementID: string;
+  nsdeviceuid: string;
+  os: string;
+  os_version: string;
+}
+
+export interface Device {
+  attributes: {
+    _id: string;
+    client_install_time: number;
+    client_version: string;
+    device_id: string;
+    host_info: Host;
+    last_event: Event;
+    users: DeviceUser[];
+  };
+}
+
+export interface ErrorPayload {
+  status: 'error';
+  errorCode: string;
+  errors: string[];
+  warnings?: string[];
+}
+
+export type SuccessPayload<T> = { status: 'success'; msg: string; data: T };
+
+export type NetskopeResponse<T> = SuccessPayload<T> | ErrorPayload;
