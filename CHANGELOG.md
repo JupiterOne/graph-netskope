@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Use different way of fetching app instances to see if that'll have any effect.
+
 ## 1.0.0 - 2022-05-25
 
 ### Added
