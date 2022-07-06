@@ -70,6 +70,40 @@ export class APIClient {
     }
   }
 
+  public async getRequest<T>(uri: string): Promise<T> {
+    try {
+      const result = await retry<Response>(
+        async () => {
+          const response = await fetch(uri, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          if (!response.ok) {
+            throw new ResponseError({
+              endpoint: uri,
+              status: response.status,
+              statusText: response.statusText,
+              response,
+            });
+          }
+          return response;
+        },
+        {
+          delay: 1000,
+          maxAttempts: 10,
+        },
+      );
+      return (await result.json()) as T;
+    } catch (err) {
+      throw new IntegrationProviderAPIError({
+        cause: err,
+        endpoint: uri.toString(),
+        status: err.status,
+        statusText: err.statusText,
+      });
+    }
+  }
+
   public async verifyAuthentication(): Promise<void> {
     const endpoint = this.withBaseUri('/clients', { limit: '1' });
     try {
@@ -148,6 +182,40 @@ export class APIClient {
       });
 
       const body = await this.request<NetskopeResponse<AppInstance[]>>(
+        endpoint,
+      );
+
+      if (body.status === 'error') {
+        throw new IntegrationProviderAPIError({
+          endpoint: endpoint,
+          status: body.errorCode,
+          statusText: body.errors.join('\n'),
+        });
+      }
+
+      for (const appInstance of body.data) {
+        await iteratee(appInstance);
+      }
+
+      page += 1;
+      length = body.data.length;
+    } while (length > 0);
+  }
+
+  // A different way of listing app instances - attempt to see if this will fix the problem
+  public async iterateGetAppInstances(iteratee: ResourceIteratee<AppInstance>) {
+    let page = 0;
+    let length = 0;
+
+    do {
+      const endpoint = this.withBaseUri('/app_instances', {
+        op: 'list',
+        limit: `${this.paginateEntitiesPerPage}`,
+        skip: `${this.paginateEntitiesPerPage * page}`,
+        token: this.config.apiV1Token,
+      });
+
+      const body = await this.getRequest<NetskopeResponse<AppInstance[]>>(
         endpoint,
       );
 

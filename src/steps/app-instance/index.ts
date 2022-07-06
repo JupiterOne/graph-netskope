@@ -23,7 +23,7 @@ export async function fetchAppInstances({
   const apiClient = createAPIClient(instance.config);
   const tenantEntity = (await jobState.getData(TENANT_ENTITY_KEY)) as Entity;
 
-  await apiClient.iterateAppInstances(async (appInstance) => {
+  await apiClient.iterateGetAppInstances(async (appInstance) => {
     const appInstanceEntity = createAppInstanceEntity(appInstance);
 
     await jobState.addEntity(appInstanceEntity);
