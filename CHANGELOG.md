@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.1.0 - 2022-08-30
+
+### Changed
+
+- Disabled `app_instances` step while we transition to v2.
+
 ## 1.0.1 - 2022-07-06
 
 ### Changed
