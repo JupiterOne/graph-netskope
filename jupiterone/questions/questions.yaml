@@ -6,10 +6,10 @@ questions:
   title: Who are the active Netkope users that do not have a user configuration?
   description: Returns a list of active Netskope users that do not have a user configuration.
   queries:
-  - name: Netskope User Configuration
+  - name: Netskope User Source
     resultsAre: INFORMATIVE
     query: |
-      FIND  netskope_user WITH active = true AND userSource ~= 'Directory'
+      FIND netskope_user WITH active = true AND userSource ~= 'Directory'
         THAT !HAS netskope_user_configuration 
   tags:
   - netskope
