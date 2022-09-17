@@ -1,15 +1,16 @@
 ---
-sourceId: managed:template
+sourceId: managed:netskope
 integrationDefinitionId: '${integration_definition_id}'
-questions: []
-  # - id: integration-question-template-replace-me
-  #   title: What kinds of questions will this integration support?
-  #   description:
-  #     TODO Every integration should contribute questions! Please be carefule
-  #     to replace this before deploying the integration to JupiterOne.
-  #   queries:
-  #     - name: good
-  #       query: |
-  #         find * with _integrationDefinitionId = '${integration_definition_id}'
-  #   tags:
-  #     - template
+questions: 
+- id: managed-question-netskope-active-users-that-do-not-have-a-netskope-user-configuration
+  title: Who are the active Netkope users that do not have a user configuration?
+  description: Returns a list of active Netskope users that do not have a user configuration.
+  queries:
+  - name: Netskope User Configuration
+    resultsAre: INFORMATIVE
+    query: |
+      FIND  netskope_user WITH active = true AND userSource ~= 'Directory'
+        THAT !HAS netskope_user_configuration 
+  tags:
+  - netskope
+  - user 
