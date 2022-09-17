@@ -4,7 +4,7 @@ integrationDefinitionId: '${integration_definition_id}'
 questions: 
 - id: managed-question-netskope-active-users-that-do-not-have-a-netskope-user-configuration
   title: Who are the active Netkope users that do not have a user configuration?
-  description: Returns a list of active Netskope users that do not have a user configuration.
+  description: Returns a list of active Netskope users from an external directory user source.
   queries:
   - name: Netskope User Source
     resultsAre: INFORMATIVE
