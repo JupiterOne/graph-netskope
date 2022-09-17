@@ -9,7 +9,7 @@ questions:
   - name: Netskope User Source
     resultsAre: INFORMATIVE
     query: |
-      FIND netskope_user WITH active = true AND userSource ~= 'Directory'
+      FIND netskope_user WITH active = true 
         THAT !HAS netskope_user_configuration 
   tags:
   - netskope
