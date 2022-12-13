@@ -1,6 +1,7 @@
 import {
   createIntegrationEntity,
   Entity,
+  parseTimePropertyValue,
 } from '@jupiterone/integration-sdk-core';
 
 import { Entities } from '../constants';
@@ -31,6 +32,14 @@ export function createDeviceEntity(device: Device): Entity {
         deviceId: dev.device_id,
         os: dev.host_info.os,
         osVersion: dev.host_info.os_version,
+        lastEvent: dev.last_event.event,
+        lastEventStatus: dev.last_event.status,
+        lastEventNpaStatus: dev.last_event.npa_status,
+        lastEventActor: dev.last_event.actor,
+        lastEventOccurredOn: parseTimePropertyValue(
+          dev.last_event.timestamp,
+          'ms',
+        ),
       },
     },
   });
