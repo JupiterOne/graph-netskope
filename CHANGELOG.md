@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Added the following properties: `lastEvent`, `lastEventStatus`,
+  `lastEventNpaStatus`, `lastEventActor` and `lastEventOccurredOn` to the
+  `netskope_device` and `netskope_user` entities.
+
 ## 1.1.0 - 2022-08-30
 
 ### Changed
