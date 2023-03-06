@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.2.0 -- 2023-03-06
+
 ### Added
 
 - Added the following properties: `lastEvent`, `lastEventStatus`,
