@@ -2,6 +2,7 @@ import { executeStepWithDependencies } from '@jupiterone/integration-sdk-testing
 import { buildStepTestConfigForStep } from '../../../test/config';
 import { Recording, setupProjectRecording } from '../../../test/recording';
 import { IntegrationSteps } from '../constants';
+import { omit } from 'lodash';
 
 // See test/README.md for details
 let recording: Recording;
@@ -18,4 +19,5 @@ test('build-tenant-and-device-relationships', async () => {
   const stepConfig = buildStepTestConfigForStep(IntegrationSteps.DEVICES);
   const stepResult = await executeStepWithDependencies(stepConfig);
   expect(stepResult).toMatchStepMetadata(stepConfig);
+  expect(omit(stepResult.collectedEntities[0], ['_rawData'])).toMatchSnapshot();
 });
