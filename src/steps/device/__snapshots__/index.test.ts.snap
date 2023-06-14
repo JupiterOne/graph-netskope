@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`build-tenant-and-device-relationships 1`] = `
+Object {
+  "_class": Array [
+    "Device",
+  ],
+  "_key": "netskope_device:CLW247-360",
+  "_type": "netskope_device",
+  "category": "Windows",
+  "clientInstallTime": 1628251103,
+  "clientVersion": "94.1.1.960",
+  "createdOn": undefined,
+  "deviceId": "CLW247-360",
+  "displayName": "CLW247-360",
+  "id": "CLW247-360",
+  "lastEvent": "System shutdown",
+  "lastEventActor": "System",
+  "lastEventNpaStatus": "Steering Disabled",
+  "lastEventOccurredOn": 1653479089,
+  "lastEventStatus": "Disabled",
+  "lastSeenOn": 1653479089,
+  "make": "Dell Inc.",
+  "model": "Vostro 3580",
+  "name": "CLW247-360",
+  "os": "Windows",
+  "osVersion": "10.0 (2009)",
+  "serial": "[REDACTED]",
+}
+`;

@@ -40,6 +40,7 @@ export function createDeviceEntity(device: Device): Entity {
           dev.last_event.timestamp,
           'ms',
         ),
+        lastSeenOn: parseTimePropertyValue(dev.last_event.timestamp, 'ms'),
       },
     },
   });

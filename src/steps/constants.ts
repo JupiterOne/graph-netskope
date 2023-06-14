@@ -53,6 +53,7 @@ export const Entities: Record<
         lastEventNpaStatus: { type: 'string' },
         lastEventActor: { type: 'string' },
         lastEventOccurredOn: { type: 'number' },
+        lastSeenOn: { type: 'number' },
       },
       required: ['id'],
     },
