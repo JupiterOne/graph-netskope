@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.2.1 -- 2023-06-16
+
+### Added
+
+- Added `lastSeenOn` to Device entities.
+
 ## 1.2.0 -- 2023-03-06
 
 ### Added
