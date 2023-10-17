@@ -1,0 +1,12 @@
+openapi: 3.0.1
+info:
+  title: '@jupiterone/graph-netskope'
+  description: A JupiterOne Integration for ingesting data of the Netskope
+  x-cortex-git:
+    github:
+      repository: JupiterOne/graph-netskope
+  x-cortex-owners:
+    - type: group
+      name: JupiterOne/integrations
+  x-cortex-service-groups: tier-4
+  x-cortex-tag: '@jupiterone/graph-netskope'
