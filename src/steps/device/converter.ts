@@ -28,7 +28,7 @@ export function createDeviceEntity(device: Device): Entity {
         category: dev.host_info.os,
         make: dev.host_info.device_make,
         model: dev.host_info.device_model,
-        serial: dev.host_info.nsdeviceuid,
+        serial: dev.host_info.serialNumber ?? dev.host_info.nsdeviceuid,
         deviceId: dev.device_id,
         os: dev.host_info.os,
         osVersion: dev.host_info.os_version,
