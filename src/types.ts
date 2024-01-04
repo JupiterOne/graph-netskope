@@ -50,6 +50,7 @@ export interface Host {
   nsdeviceuid: string;
   os: string;
   os_version: string;
+  serialNumber: string;
 }
 
 export interface Device {
