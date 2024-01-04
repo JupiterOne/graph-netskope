@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.2.2 -- 2023-06-16
+
+### Updated
+
+- Updated `serial` to use the host's serialNumber if available.
+
 ## 1.2.1 -- 2023-06-16
 
 ### Added
