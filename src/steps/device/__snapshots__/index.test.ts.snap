@@ -21,6 +21,7 @@ Object {
   "lastEventStatus": "Disabled",
   "lastSeenOn": 1653479089,
   "make": "Dell Inc.",
+  "managementId": "",
   "model": "Vostro 3580",
   "name": "CLW247-360",
   "os": "Windows",
