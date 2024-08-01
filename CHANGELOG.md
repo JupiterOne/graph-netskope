@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.2.3 -- 2024-08-01
+
+### Updated
+
+- Added device duplicate key logging and logic.
+
 ## 1.2.2 -- 2023-06-16
 
 ### Updated
