@@ -8,11 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
-## 1.2.4 -- 2024-08-01
+## 1.2.5 -- 2024-08-01
 
 ### Updated
 
-- Added device duplicate key logging and logic.
+- Added device duplicate key logic. Based on logged values, the same devices is
+  being included in more than one response.
 
 ## 1.2.2 -- 2023-06-16
 
