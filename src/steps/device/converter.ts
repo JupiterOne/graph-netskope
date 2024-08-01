@@ -13,6 +13,7 @@ export function getDeviceKey(id: string): string {
 
 export function createDeviceEntity(device: Device): Entity {
   const { attributes: dev } = device;
+  const serial = dev.host_info.serialNumber ?? dev.host_info.nsdeviceuid;
 
   return createIntegrationEntity({
     entityData: {
@@ -28,7 +29,8 @@ export function createDeviceEntity(device: Device): Entity {
         category: dev.host_info.os,
         make: dev.host_info.device_make,
         model: dev.host_info.device_model,
-        serial: dev.host_info.serialNumber ?? dev.host_info.nsdeviceuid,
+        serial: serial,
+        managementId: dev.host_info.managementID,
         deviceId: dev.device_id,
         os: dev.host_info.os,
         osVersion: dev.host_info.os_version,
