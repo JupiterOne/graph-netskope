@@ -8,7 +8,7 @@ import {
 
 import { IntegrationConfig } from '../../config';
 import { IntegrationSteps, Entities, Relationships } from '../constants';
-import { createUserEntity, getUserKey } from './converter';
+import { createUserEntity } from './converter';
 import { Device } from '../../types';
 
 export async function buildDeviceHasUserRelationships({
@@ -34,9 +34,11 @@ export async function buildDeviceHasUserRelationships({
       } = device;
 
       for (const user of users) {
-        let userEntity = await jobState.findEntity(getUserKey(user.username));
-        if (!userEntity) {
-          userEntity = createUserEntity(user);
+        if (!user._id) {
+          continue;
+        }
+        const userEntity = createUserEntity(user);
+        if (!jobState.hasKey(userEntity._key)) {
           await jobState.addEntity(userEntity);
         }
         await jobState.addRelationship(
