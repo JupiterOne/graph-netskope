@@ -34,7 +34,7 @@ export async function buildDeviceHasUserRelationships({
       } = device;
 
       for (const user of users) {
-        if (!user._id) {
+        if (!user._id || !user.userkey) {
           continue;
         }
         const userEntity = createUserEntity(user);

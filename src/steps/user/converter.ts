@@ -7,8 +7,8 @@ import {
 import { Entities } from '../constants';
 import { DeviceUser } from '../../types';
 
-export function getUserKey(id: string): string {
-  return `netskope_user:${id}`;
+export function getUserKey(id: string, userKey: string): string {
+  return `netskope_user:${id}-${userKey}`;
 }
 
 export function createUserEntity(user: DeviceUser): Entity {
@@ -16,7 +16,7 @@ export function createUserEntity(user: DeviceUser): Entity {
     entityData: {
       source: user,
       assign: {
-        _key: getUserKey(user.username),
+        _key: getUserKey(user._id, user.userkey),
         _type: Entities.USER._type,
         _class: Entities.USER._class,
         id: user._id,
