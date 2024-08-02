@@ -181,9 +181,8 @@ export class APIClient {
         skip: `${this.paginateEntitiesPerPage * page}`,
       });
 
-      const body = await this.request<NetskopeResponse<AppInstance[]>>(
-        endpoint,
-      );
+      const body =
+        await this.request<NetskopeResponse<AppInstance[]>>(endpoint);
 
       if (body.status === 'error') {
         throw new IntegrationProviderAPIError({
@@ -215,9 +214,8 @@ export class APIClient {
         token: this.config.apiV1Token,
       });
 
-      const body = await this.getRequest<NetskopeResponse<AppInstance[]>>(
-        endpoint,
-      );
+      const body =
+        await this.getRequest<NetskopeResponse<AppInstance[]>>(endpoint);
 
       if (body.status === 'error') {
         throw new IntegrationProviderAPIError({

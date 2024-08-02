@@ -5,5 +5,4 @@ dist/
 .env
 .eslintcache
 tsconfig.tsbuildinfo
-
-.idea
+.npmrc
