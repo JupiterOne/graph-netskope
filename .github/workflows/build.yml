@@ -9,14 +9,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code repository source code
+        uses: actions/checkout@v3
+
       - id: setup-node
         name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 14.x
-
-      - name: Check out code repository source code
-        uses: actions/checkout@v2
+          node-version: 18.x
 
       - name: Install dependencies
         run: yarn
@@ -34,15 +34,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Setup Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-
       - name: Check out repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
 
       # Fetch tags and describe the commit before the merge commit
       # to see if it's a version publish

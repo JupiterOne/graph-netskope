@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-netskope",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "A JupiterOne Integration for ingesting data of the Netskope",
   "repository": {
     "type": "git",
@@ -16,11 +16,15 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=18.0.0 <19.x"
+  },
   "scripts": {
     "start": "j1-integration collect",
     "graph": "j1-integration visualize",
     "graph:types": "j1-integration visualize-types",
     "graph:spec": "j1-integration visualize-types --project-path docs/spec --output-file ./.j1-integration/types-graph/index.spec.html",
+    "graph:dependencies": "j1-integration visualize-dependencies",
     "validate:questions:dry": "j1-integration validate-question-file --dry-run",
     "validate:questions": "j1-integration validate-question-file -a $MANAGED_QUESTIONS_JUPITERONE_ACCOUNT_ID -k $MANAGED_QUESTIONS_JUPITERONE_API_KEY",
     "lint": "eslint . --cache --fix --ext .ts,.tsx",
@@ -31,15 +35,17 @@
     "test:env": "LOAD_ENV=1 yarn test",
     "test:ci": "yarn format:check && yarn lint && yarn type-check && yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration && cp README.md dist/README.md && cp -r jupiterone/ dist/jupiterone/",
-    "prepush": "yarn format:check && yarn lint && yarn type-check && jest --changedSince main"
+    "prepush": "yarn format:check && yarn lint && yarn type-check && jest --changedSince main",
+    "postversion": "cp package.json ./dist/package.json"
   },
   "peerDependencies": {
-    "@jupiterone/integration-sdk-core": "^8.22.0"
+    "@jupiterone/integration-sdk-core": "^13.2.0"
   },
   "devDependencies": {
-    "@jupiterone/integration-sdk-core": "^8.22.0",
-    "@jupiterone/integration-sdk-dev-tools": "^8.22.0",
-    "@jupiterone/integration-sdk-testing": "^8.22.0",
+    "@jupiterone/integration-sdk-core": "^13.2.0",
+    "@jupiterone/integration-sdk-dev-tools": "^13.2.0",
+    "@jupiterone/integration-sdk-testing": "^13.2.0",
+    "@types/node": "^22.1.0",
     "@types/to-json-schema": "^0.2.4"
   },
   "dependencies": {

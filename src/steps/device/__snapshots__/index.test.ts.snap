@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`build-tenant-and-device-relationships 1`] = `
-Object {
-  "_class": Array [
+{
+  "_class": [
     "Device",
   ],
   "_key": "netskope_device:CLW247-360",
