@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-netskope",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "A JupiterOne Integration for ingesting data of the Netskope",
   "repository": {
     "type": "git",
@@ -45,10 +45,12 @@
     "@jupiterone/integration-sdk-core": "^13.2.0",
     "@jupiterone/integration-sdk-dev-tools": "^13.2.0",
     "@jupiterone/integration-sdk-testing": "^13.2.0",
-    "@types/node": "^22.1.0"
+    "@types/node": "^22.1.0",
+    "@types/to-json-schema": "^0.2.4"
   },
   "dependencies": {
     "@lifeomic/attempt": "^3.0.3",
-    "node-fetch": "2"
+    "node-fetch": "2",
+    "to-json-schema": "^0.2.5"
   }
 }
