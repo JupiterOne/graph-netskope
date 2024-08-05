@@ -31,6 +31,14 @@ export async function fetchUserConfiguration({
         return;
       }
 
+      if (!user.username) {
+        logger.warn(
+          { userKey: userEntity._key },
+          'Username value is missing for user entity',
+        );
+        return;
+      }
+
       await apiClient.iterateUserConfigurationInUser(
         user.username,
         async (userConfig) => {
