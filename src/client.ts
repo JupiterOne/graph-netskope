@@ -145,7 +145,7 @@ export class APIClient {
         });
       }
 
-      for (const device of body.data) {
+      for (const device of body.data ?? []) {
         await iteratee(device);
       }
 
@@ -193,7 +193,7 @@ export class APIClient {
         });
       }
 
-      for (const appInstance of body.data) {
+      for (const appInstance of body.data ?? []) {
         await iteratee(appInstance);
       }
 
@@ -227,7 +227,7 @@ export class APIClient {
         });
       }
 
-      for (const appInstance of body.data) {
+      for (const appInstance of body.data ?? []) {
         await iteratee(appInstance);
       }
 
