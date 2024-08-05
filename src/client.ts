@@ -116,9 +116,8 @@ export class APIClient extends BaseAPIClient {
       const skip = ENTITIES_PER_PAGE * page;
       const endpoint = `/app_instances?op=list&limit=${ENTITIES_PER_PAGE}&skip=${skip}`;
 
-      const body = await this.postRequest<NetskopeResponse<AppInstance[]>>(
-        endpoint,
-      );
+      const body =
+        await this.postRequest<NetskopeResponse<AppInstance[]>>(endpoint);
 
       if (body.status === 'error') {
         throw new IntegrationProviderAPIError({
@@ -146,9 +145,8 @@ export class APIClient extends BaseAPIClient {
       const skip = ENTITIES_PER_PAGE * page;
       const endpoint = `/app_instances?op=list&limit=${ENTITIES_PER_PAGE}&skip=${skip}&token=${this.token}`;
 
-      const body = await this.getRequest<NetskopeResponse<AppInstance[]>>(
-        endpoint,
-      );
+      const body =
+        await this.getRequest<NetskopeResponse<AppInstance[]>>(endpoint);
 
       if (body.status === 'error') {
         throw new IntegrationProviderAPIError({
