@@ -49,8 +49,7 @@
     "@types/to-json-schema": "^0.2.4"
   },
   "dependencies": {
-    "@lifeomic/attempt": "^3.0.3",
-    "node-fetch": "2",
+    "@jupiterone/integration-sdk-http-client": "^13.2.0",
     "to-json-schema": "^0.2.5"
   }
 }

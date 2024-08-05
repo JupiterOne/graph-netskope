@@ -1,113 +1,57 @@
-import { URL, URLSearchParams } from 'url';
-import fetch, { Response } from 'node-fetch';
-import { retry } from '@lifeomic/attempt';
-
 import {
+  IntegrationLogger,
   IntegrationProviderAPIError,
   IntegrationProviderAuthenticationError,
 } from '@jupiterone/integration-sdk-core';
 
 import { IntegrationConfig } from './config';
 import { AppInstance, Device, NetskopeResponse, UserConfig } from './types';
+import { BaseAPIClient } from '@jupiterone/integration-sdk-http-client';
 
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 
-class ResponseError extends IntegrationProviderAPIError {
-  response: Response;
-  constructor(options) {
-    super(options);
-    this.response = options.response;
+const ENTITIES_PER_PAGE = 500;
+
+export class APIClient extends BaseAPIClient {
+  private readonly token: string;
+
+  constructor(config: IntegrationConfig, logger: IntegrationLogger) {
+    super({
+      baseUrl: `https://${config.tenantName}.goskope.com/api/v1`,
+      logger,
+      logErrorBody: true,
+    });
+    this.token = config.apiV1Token;
   }
-}
 
-export class APIClient {
-  constructor(readonly config: IntegrationConfig) {}
+  protected getAuthorizationHeaders(): Record<string, string> {
+    // Not fully implemented because netskope API doesn't authenticate through headers
+    return {};
+  }
 
-  private readonly paginateEntitiesPerPage = 500;
-
-  private withBaseUri = (path: string, params?: Record<string, string>) => {
-    const url = new URL(
-      `https://${this.config.tenantName}.goskope.com/api/v1${path}`,
-    );
-    url.search = new URLSearchParams(params).toString();
-    return url.toString();
-  };
-
-  public async request<T>(uri: string): Promise<T> {
-    try {
-      const result = await retry<Response>(
-        async () => {
-          // Only POST requests can have body, where token is placed
-          const authBody = { token: this.config.apiV1Token };
-          const response = await fetch(uri, {
-            method: 'POST',
-            body: JSON.stringify(authBody),
-            headers: { 'Content-Type': 'application/json' },
-          });
-          if (!response.ok) {
-            throw new ResponseError({
-              endpoint: uri,
-              status: response.status,
-              statusText: response.statusText,
-              response,
-            });
-          }
-          return response;
-        },
-        {
-          delay: 1000,
-          maxAttempts: 10,
-        },
-      );
-      return (await result.json()) as T;
-    } catch (err) {
-      throw new IntegrationProviderAPIError({
-        cause: err,
-        endpoint: uri.toString(),
-        status: err.status,
-        statusText: err.statusText,
-      });
-    }
+  public async postRequest<T>(uri: string): Promise<T> {
+    const response = await this.retryableRequest(uri, {
+      method: 'POST',
+      body: {
+        token: this.token,
+      },
+      authorize: false, // don't set Authorization headers
+    });
+    return response.json();
   }
 
   public async getRequest<T>(uri: string): Promise<T> {
-    try {
-      const result = await retry<Response>(
-        async () => {
-          const response = await fetch(uri, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          if (!response.ok) {
-            throw new ResponseError({
-              endpoint: uri,
-              status: response.status,
-              statusText: response.statusText,
-              response,
-            });
-          }
-          return response;
-        },
-        {
-          delay: 1000,
-          maxAttempts: 10,
-        },
-      );
-      return (await result.json()) as T;
-    } catch (err) {
-      throw new IntegrationProviderAPIError({
-        cause: err,
-        endpoint: uri.toString(),
-        status: err.status,
-        statusText: err.statusText,
-      });
-    }
+    const response = await this.retryableRequest(uri, {
+      method: 'GET',
+      authorize: false, // don't set Authorization headers
+    });
+    return response.json();
   }
 
   public async verifyAuthentication(): Promise<void> {
-    const endpoint = this.withBaseUri('/clients', { limit: '1' });
+    const endpoint = '/clients?limit=1';
     try {
-      const body = await this.request<NetskopeResponse<Device[]>>(endpoint);
+      const body = await this.postRequest<NetskopeResponse<Device[]>>(endpoint);
       if (body.status === 'error') {
         throw new IntegrationProviderAuthenticationError({
           endpoint,
@@ -130,12 +74,10 @@ export class APIClient {
     let length = 0;
 
     do {
-      const endpoint = this.withBaseUri('/clients', {
-        limit: `${this.paginateEntitiesPerPage}`,
-        skip: `${this.paginateEntitiesPerPage * page}`,
-      });
+      const skip = ENTITIES_PER_PAGE * page;
+      const endpoint = `/clients?limit=${ENTITIES_PER_PAGE}&skip=${skip}`;
 
-      const body = await this.request<NetskopeResponse<Device[]>>(endpoint);
+      const body = await this.postRequest<NetskopeResponse<Device[]>>(endpoint);
 
       if (body.status === 'error') {
         throw new IntegrationProviderAPIError({
@@ -158,12 +100,8 @@ export class APIClient {
     email: string,
     iteratee: ResourceIteratee<UserConfig>,
   ) {
-    const endpoint = this.withBaseUri('/userconfig', {
-      email,
-      configtype: 'agent',
-    });
-
-    const body = await this.request<NetskopeResponse<UserConfig>>(endpoint);
+    const endpoint = `/userconfig?email=${email}&configtype=agent`;
+    const body = await this.postRequest<NetskopeResponse<UserConfig>>(endpoint);
 
     if (body.status === 'success') {
       await iteratee(body.data);
@@ -175,14 +113,12 @@ export class APIClient {
     let length = 0;
 
     do {
-      const endpoint = this.withBaseUri('/app_instances', {
-        op: 'list',
-        limit: `${this.paginateEntitiesPerPage}`,
-        skip: `${this.paginateEntitiesPerPage * page}`,
-      });
+      const skip = ENTITIES_PER_PAGE * page;
+      const endpoint = `/app_instances?op=list&limit=${ENTITIES_PER_PAGE}&skip=${skip}`;
 
-      const body =
-        await this.request<NetskopeResponse<AppInstance[]>>(endpoint);
+      const body = await this.postRequest<NetskopeResponse<AppInstance[]>>(
+        endpoint,
+      );
 
       if (body.status === 'error') {
         throw new IntegrationProviderAPIError({
@@ -207,15 +143,12 @@ export class APIClient {
     let length = 0;
 
     do {
-      const endpoint = this.withBaseUri('/app_instances', {
-        op: 'list',
-        limit: `${this.paginateEntitiesPerPage}`,
-        skip: `${this.paginateEntitiesPerPage * page}`,
-        token: this.config.apiV1Token,
-      });
+      const skip = ENTITIES_PER_PAGE * page;
+      const endpoint = `/app_instances?op=list&limit=${ENTITIES_PER_PAGE}&skip=${skip}&token=${this.token}`;
 
-      const body =
-        await this.getRequest<NetskopeResponse<AppInstance[]>>(endpoint);
+      const body = await this.getRequest<NetskopeResponse<AppInstance[]>>(
+        endpoint,
+      );
 
       if (body.status === 'error') {
         throw new IntegrationProviderAPIError({
@@ -235,6 +168,13 @@ export class APIClient {
   }
 }
 
-export function createAPIClient(config: IntegrationConfig): APIClient {
-  return new APIClient(config);
+let client: APIClient | undefined;
+export function createAPIClient(
+  config: IntegrationConfig,
+  logger: IntegrationLogger,
+): APIClient {
+  if (!client) {
+    client = new APIClient(config, logger);
+  }
+  return client;
 }
