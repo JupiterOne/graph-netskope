@@ -19,8 +19,9 @@ import { createDeviceEntity } from './converter';
 export async function fetchDevices({
   instance,
   jobState,
+  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = createAPIClient(instance.config);
+  const apiClient = createAPIClient(instance.config, logger);
   const tenantEntity = (await jobState.getData(TENANT_ENTITY_KEY)) as Entity;
 
   await apiClient.iterateDevices(async (device) => {

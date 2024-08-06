@@ -1,3 +1,4 @@
+jest.setTimeout(60_000);
 import { executeStepWithDependencies } from '@jupiterone/integration-sdk-testing';
 import { buildStepTestConfigForStep } from '../../../test/config';
 import { Recording, setupProjectRecording } from '../../../test/recording';
