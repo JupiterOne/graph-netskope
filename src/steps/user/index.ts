@@ -41,7 +41,7 @@ export async function buildDeviceHasUserRelationships({
             const userSchema = toJsonSchema(user);
             logger.warn({ userSchema }, `User doesn't have a unique key`);
           } catch (err) {
-            // pass
+            logger.warn({ err }, 'Failed to extract user schema');
           }
           continue;
         }
@@ -49,23 +49,25 @@ export async function buildDeviceHasUserRelationships({
         if (!jobState.hasKey(userEntity._key)) {
           await jobState.addEntity(userEntity);
         }
-        await jobState.addRelationship(
-          createDirectRelationship({
-            _class: RelationshipClass.HAS,
-            from: deviceEntity,
-            to: userEntity,
-            properties: {
-              lastEvent: user.last_event.event,
-              lastEventStatus: user.last_event.status,
-              lastEventNpaStatus: user.last_event.npa_status,
-              lastEventActor: user.last_event.actor,
-              lastEventOccurredOn: parseTimePropertyValue(
-                user.last_event.timestamp,
-                'ms',
-              ),
-            },
-          }),
-        );
+        const relationship = createDirectRelationship({
+          _class: RelationshipClass.HAS,
+          from: deviceEntity,
+          to: userEntity,
+          properties: {
+            _key: `${deviceEntity._key}|has|${userEntity._key}-${user._id}`,
+            lastEvent: user.last_event.event,
+            lastEventStatus: user.last_event.status,
+            lastEventNpaStatus: user.last_event.npa_status,
+            lastEventActor: user.last_event.actor,
+            lastEventOccurredOn: parseTimePropertyValue(
+              user.last_event.timestamp,
+              'ms',
+            ),
+          },
+        });
+        if (!jobState.hasKey(relationship._key)) {
+          await jobState.addRelationship(relationship);
+        }
       }
     },
   );
