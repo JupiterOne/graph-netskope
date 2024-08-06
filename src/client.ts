@@ -92,7 +92,7 @@ export class APIClient extends BaseAPIClient {
       }
 
       page += 1;
-      length = body.data.length;
+      length = body.data?.length;
     } while (length > 0);
   }
 
@@ -132,7 +132,7 @@ export class APIClient extends BaseAPIClient {
       }
 
       page += 1;
-      length = body.data.length;
+      length = body.data?.length;
     } while (length > 0);
   }
 
@@ -161,7 +161,7 @@ export class APIClient extends BaseAPIClient {
       }
 
       page += 1;
-      length = body.data.length;
+      length = body.data?.length;
     } while (length > 0);
   }
 }
